@@ -73,7 +73,6 @@ classdef TestGen < handle
             this.cov_curr = 0;
             this.act_curr = cell(1, this.net.numLayers-1);
             for a = 1:numel(this.act_curr)
-                %TODO init 0
                 this.act_curr{a} = zeros(this.net.layers{a}.dimensions, 1);
             end
             
@@ -85,13 +84,10 @@ classdef TestGen < handle
             this.cov_metric = cov_metric;
             this.cov_param = cov_param;
             
+            %initializing python class
+            GetManifoldCov.initializePythonObject();
             
             this.solver = solver;
-%             if strcmp(this.solver, 'sa')
-%                 this.setup_sa();
-%             elseif strcmp(this.solver, 'cmaes')
-%                 this.setup_cmaes;
-%             end
             switch this.solver
                 case 'sa'
                     this.setup_sa();
@@ -246,16 +242,28 @@ classdef TestGen < handle
                 end
             end
             
+            signals_origin = this.br.P.traj{1,1}.X;
+            signal_indices = cellfun(@(signal) find(strcmp(signal, signal_list)), signal_list);
+
+            % Identify the index for v_lead signal
+            v_lead_index = find(strcmp('v_lead', signal_list));
+            % Extract all values for v_lead across all iterations into an array
+            v_lead = signals_origin(v_lead_index, :); 
+
+
             % the way of updating qseed
             if strcmp(this.guidance, 'cov')
-                [~, act_neurons] = this.coverage(hidden_out);
-                [temp_cov, res_mat] = this.combineCovMat(act_neurons);
+                [temp_cov] = this.coverage(v_lead);
+                %[~, act_neurons] = this.coverage(hidden_out);
+                %[temp_cov, res_mat] = this.combineCovMat(act_neurons);
+		fprintf('this.cov_curr value: %f\n ', this.cov_curr)
+		fprintf('temp_cov value: %f\n', temp_cov)
                 if temp_cov > this.cov_curr
                     this.cov_curr = temp_cov;
-                    this.act_curr = res_mat;
+                    %this.act_curr = res_mat;
                     this.qseed.push(x);
-                end
-                
+                end 
+    
             elseif strcmp(this.guidance, 'rob')
                 [temp_cov, res_mat] = this.combineCovMat(act_neurons);
                 if rob < this.obj_best
@@ -299,7 +307,12 @@ classdef TestGen < handle
             temp_cov = sum(cell2mat(res_mat') > 0)/this.nn_num_neurons;
         end
         
-        function [v, a_neurons] = coverage(this, hidden_out)
+        function [temp_cov] = coverage(this, data)
+            temp_cov = GetManifoldCov.processData(data);
+        end
+
+
+        function [v, a_neurons] = coverage_old(this, hidden_out)
             switch this.cov_metric
                 case 'nc'
                     [v, a_neurons] = NC(hidden_out, this.cov_param);

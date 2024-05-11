@@ -3,7 +3,7 @@ classdef GetManifoldCov
         function initializePythonObject()
             % Define initialization parameters
             exp_dir = 'exps/acc/8d-8d-new/'; 
-            dataset = 'acc'; % Example: 'mnist'
+            dataset = 'acc';
             v = 2;
             t = 2;
 
@@ -27,16 +27,16 @@ classdef GetManifoldCov
         
             data_table = table(data', 'VariableNames', {'v_lead'});
             writetable(data_table, matlabToPythonCsvPath);
-            disp('Data written to MATLAB-to-Python CSV.');
+            %disp('Data written to MATLAB-to-Python CSV.');
         
             GetManifoldCov.writeFlag(dataFlagPath, 'new data');
-            disp('Waiting for Python to process the new data...');
+            %disp('Waiting for Python to process the new data...');
             GetManifoldCov.waitForFlag(dataFlagPath, 'data-processed');
         
             processedData = readtable(pythonToMatlabCsvPath);
-            disp('Processed data received from Python:');
+            %disp('Processed data received from Python:');
             coverage = processedData.current_coverage;
-            fprintf('current coverage in GetManifold: %f\n', coverage);
+            %:qfprintf('current coverage in GetManifold: %f\n', coverage);
             fID = fopen(pythonToMatlabCsvPath, 'w');
             fclose(fID);
         end

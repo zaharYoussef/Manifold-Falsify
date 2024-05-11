@@ -1,19 +1,13 @@
 model 1
-nncACCsystem_4_30
+nncACCsystem_3_30
 addpath 2
-/home/zhenya/breach/
-/home/zhenya/FalsifAI/
+/Users/breach
+/Users/Manifold-Falsify
 input_name 1
 in_lead
 input_range 1
 -1 1
-optimization 1
-cmaes
-phi 1
-ACC1 alw_[0,50](d_rel[t] - 1.4 * v_ego[t] >= 4)
-controlpoints 1
-10
-parameters 14 
+parameters 14
 T=50;
 Ts=0.1;
 G_ego=tf(1,[0.5,1,0]);
@@ -30,7 +24,13 @@ amin_lead=-1;
 amax_lead=1;
 timespan 1
 0:.1:50
-max_sim 1
-150
 trials 1
 30
+timeout 1
+150
+nn_in 5
+v_set
+t_gap
+v_ego
+d_rel
+v_rel

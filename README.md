@@ -1,6 +1,8 @@
-# FalsifAI
+# DomainSweep
 
-This repository is for the artifact evaluation of the paper "FalsifAI: Falsification of AI-Enabled Hybrid Control Systems Guided by Time-Aware Coverage Criteria".
+This repository is a an extension of FalsifAI. In this work we are using a different coverage criteria to drive the falsification than the ones used in the FalsifAI work.
+
+We are using a manifold coverage. The code used to train the vae and get the coverage can be found here: [https://github.umn.edu/zahar022/aahaa-testgen](https://github.umn.edu/zahar022/aahaa-testgen).
 
 ## System requirement
 
@@ -15,6 +17,7 @@ This repository is for the artifact evaluation of the paper "FalsifAI: Falsifica
   1. [Model Predictive Control Toolbox](https://www.mathworks.com/help/mpc/index.html) for ACC benchmark
   2. [Stateflow](https://www.mathworks.com/products/stateflow.html)
   3. [Deep Learning Toolbox](https://www.mathworks.com/products/deep-learning.html)
+  4. [Deep Learning Toolbox Converter for TensorFlow Models] 
 
 ## Folder Structure Conventions
 
@@ -29,16 +32,6 @@ This repository is for the artifact evaluation of the paper "FalsifAI: Falsifica
 │   │   │   ├── ACC_falsification.m
 │   │   │   ├── ACC_falsify.m
 │   │   │   └── ACC_trainController.m
-│   │   ├── AFC
-│   │   │   ├── AFC_config.txt
-│   │   │   ├── AFC_falsification.m
-│   │   │   ├── AFC_falsify.m
-│   │   │   └── AFC_trainController.m
-│   │   └── DPC
-│   │       ├── buck_config.txt
-│   │       ├── buck_falsification.m
-│   │       ├── buck_falsify.m
-│   │       └── buck_trainController.m
 │   ├── ACC
 │   │   ├── dataset
 │   │   │   └── ACC_trainset.mat
@@ -47,53 +40,32 @@ This repository is for the artifact evaluation of the paper "FalsifAI: Falsifica
 │   │   │   └── nncACCsystem.slx
 │   │   ├── nnconfig
 │   │   └── nncontroller
-│   ├── AFC
-│   │   ├── dataset
-│   │   │   └── AFC_trainset.mat
-│   │   ├── model
-│   │   │   ├── fuel_control.slx
-│   │   │   └── nn_fuel_control.slx
-│   │   ├── nnconfig
-│   │   └── nncontroller
-│   └── DPC
-│       ├── dataset
-│       │   └── buck_trainset.mat
-│       ├── model
-│       │   ├── my_buck_pid.slx
-│       │   └── buck_nn.slx
-│       ├── nnconfig
-│       └── nncontroller
 ├── log/
 ├── results/
 ├── run
 ├── robustness_calculator.m(relied on Breach)
 ├── src
 │   ├── TestGen.m
-│   ├── main.m
-│   ├── nc
-│   │   ├── NC.m
-│   │   ├── TKC.m
-│   │   ├── TNC.m
-│   │   ├── TTK.m
-│   │   ├── PD.m
-│   │   ├── ND.m
-│   │   ├── MI.m
-│   │   └── MD.m
+│   ├── cov
+│   │   ├── comFiles
+│   │   │   └── coverage_from_encoder.csv
+│   │   │   └── data_flag.txt
+│   │   │   └── data_to_encoder.csv
+│   │   │   └── init_flag.txt
+│   │   │   └── init_params.csv
+│   │   └── GetManifoldCov.m
 │   └── util
 │       └── CQueue.m
 └── test
-│   ├── falsifai_test.py
-│   ├── breach_test.py
+│   ├── test.py
 │   ├── scripts
 │   └── config
-│       ├── AI
-│       │   ├── acc.conf
-│       │   ├── afc.conf
-│       │   └── dpc.conf
-│       └── breach
-│           ├── acc.conf
-│           ├── afc.conf
-│           └── dpc.conf
+│   │   ├── acc_3_30
+│   │   ├── acc_4_30
+│   │   ├── acc_5_30
+│   │   ├── acc_3_50
+│   │   ├── acc_4_50
+│   │   └── acc_5_50
 └── analyses
     ├── results.txt
     └── statTest.R
@@ -102,7 +74,7 @@ This repository is for the artifact evaluation of the paper "FalsifAI: Falsifica
 
 ## Installation
 
-- Clone the repository `git clone https://github.com/lyudeyun/FalsifAI.git`
+- Clone the repository `git clone https://github.com/zaharYoussef/Manifold-Falsify.git`
 
 - Install [Breach](https://github.com/decyphir/breach)
   1. start matlab, set up a C/C++ compiler using the command `mex -setup`. (Refer to [here](https://www.mathworks.com/help/matlab/matlabexternal/changing-default-compiler.html) for more details.)
@@ -110,12 +82,23 @@ This repository is for the artifact evaluation of the paper "FalsifAI: Falsifica
 
  ## Usage
 
- To reproduce the experimental results, users should follow the steps below:
+We have provided all the necessary code to reproduce our experiments but you need to have cloned and trained a VAE model using our repository mentioned above. If you are using a different code base for the VAE you just need to add code to read and write to our files in `src/cov/comFiles`. 
 
- - The user-specified configuration files are stored in the directory `test/config/`. Replace the paths of `FalsifAI` and `breach` in user-specified file under the line `addpath 2` with their own paths. Users can also specify other configurations, such as model, input ranges, optimization methods, and etc. 
- - Navigate to the directory `test/`. Run the command `python [type]_test.py config/[user-specified configuration file]`. Users can generate the testing scripts by `ai_test.py` or `breach_test.py`.
- - Now the executable scripts have been generated under the directory `test/benchmarks/`. Users need to edit the executable scripts permission using the command `chmod -R 777 *`.
- - Navigate to the root directory `falsifAI/` and run the command `make`. The automatically generated .csv experimental results will be stored in directory `results/`.
- - The corresponding log will be stored under directory `output/`.
-
-
+Once you have a traimed VAE you can follow these steps:
+1. Set the appropriate paths to `Breach` and `DomainSweep` in the config files present in `test/config`.
+2. Navigate to the directory `test/`. Run the command `python test.py config/[system config file]`.
+3. Edit the permissions in `test/benchmarks/` to run the file using the following commandL `chmod -R 777 *`
+4. Navigate to `src/cov/GetManifoldCov.m` and set the appropriate parameters to be able to run your vae encoder:<br/>
+  exp_dir: path to the VAE directory<br/>
+  dataset: name of dataset<br/>
+  v: v value to be used in setting up coverage<br/>
+  t: t value to be used in setting up T-Wise Combination coverage<br/>
+  Keep in mind that *exp_dir* needs to be the relative path that works for the VAE codebase.
+5. Set up the appropriate paths for the read and write files in `src\cov\comFile` in both codebases:
+   1. DomainSweep
+      Navigate to `src/cov/GetManifoldCov.m` and add the appropriate paths to all the files in `src\cov\comFile`
+   2. VAE codebase
+      Navigate to `vae/src/cov/matlabWrapper.py` and add the appropriate paths to all the files in `src\cov\comFile`.
+6. Now the executable scripts have been generated under the directory `test/benchmarks/`. Users need to edit the executable scripts permission using the command `chmod -R 777 *`.
+7. Navigate to the root directory `DomainSweep/` and run the command `make`. The automatically generated .csv experimental results will be stored in directory `results/`. The corresponding log will be stored under directory `output/`.
+8. Run the `vae/src/cov/matlabWrapper.py` present in the VAE codebase.

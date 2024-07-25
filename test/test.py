@@ -65,6 +65,7 @@ with open(filename, 'w') as bm:
     bm.write(f'mdl = \'{model[0]}\';\n')
     bm.write('Br = BreachSimulinkSystem(mdl);\n')
     bm.write('br = Br.copy();\n')
+    bm.write('controlpoints = 10;\n')
     bm.write(f'br.Sys.tspan = {timespan};\n')
     bm.write('input_gen.type = \'UniStep\';\n')
     bm.write('input_gen.cp = 10;\n')  # Assuming control points are 10

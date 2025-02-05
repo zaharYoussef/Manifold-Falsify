@@ -1,0 +1,10 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Zahar"
+  given-names: "Youssef"
+  orcid: "https://orcid.org/0009-0002-9565-3284"
+title: "DomainSweep"
+version: 1.0.0
+date-released: 2024-05-31
+url: "https://github.com/zaharYoussef/Manifold-Falsify"
